@@ -9,7 +9,11 @@ permissions:
   contents: read
 
 jobs:
+  dogfood:
+    uses: ./.github/workflows/dogfood.yml
+
   publish:
+    needs: dogfood
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     env:
@@ -32,8 +36,9 @@ jobs:
       - name: Resolve VSIX path
         run: echo "VSIX_PATH=apps/vscode/bend2-vscode-$(node -p \"require('./apps/vscode/package.json').version\").vsix" >> "$GITHUB_ENV"
       - name: Verify tag matches extension version
-        if: startsWith(github.ref, 'refs/tags/')
-        run: test "${GITHUB_REF_NAME#v}" = "$(node -p "require('./apps/vscode/package.json').version")"
+        run: |
+          test "$GITHUB_REF_TYPE" = "tag"
+          test "${GITHUB_REF_NAME#v}" = "$(node -p "require('./apps/vscode/package.json').version")"
       - uses: actions/upload-artifact@v4
         with:
           name: bend2-vscode-release

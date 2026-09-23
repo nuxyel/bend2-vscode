@@ -20,6 +20,7 @@
     "verify-release-metadata": "node scripts/verify-release-metadata.mjs",
     "test:integration": "npm run build && npm run bundle && node scripts/integration.mjs",
     "test:web": "npm run build && npm run bundle && node scripts/web-integration.mjs",
+    "test:dogfood": "node scripts/test-dogfood.mjs",
     "package": "npm run build && npm run bundle && npm run verify-reproducible && npm run verify-vsix",
     "check": "npm run build && npm test && npm run bundle && npm run verify-bundle"
   },

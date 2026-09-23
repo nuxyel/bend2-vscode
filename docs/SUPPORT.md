@@ -6,14 +6,16 @@ This document defines the compatibility boundary for the Bend 2 VS Code extensio
 
 | Component | Supported baseline | Behavior outside the baseline |
 | --- | --- | --- |
-| Bend compiler | Any compiler reporting a `2.x.y` version | Marked unsupported; compiler-backed operations may be disabled or fail with an actionable message |
+| Bend compiler | **Release-candidate verification targets:** minimum `2.0.25` and latest stable `2.0.27` (2026-09-23); refresh the latest pin when the 1.0 release candidate is cut | Versions outside the release's recorded test matrix are unverified; compiler-backed operations may still work, but are not covered by the 1.0 compatibility claim |
 | Host platform | Linux/macOS, or Windows through WSL/remote workspace | Native Windows compiler discovery explains the WSL or remote-workspace requirement |
 | Unversioned or unreadable Bend executable | Not verified | Marked unverified; parser features remain available and compiler commands may still be attempted |
 | VS Code desktop/remote | 1.90 or newer | The extension cannot be installed on older hosts |
 | VS Code Web | Current browser host with workspace file access | Process-dependent compiler, proof and execution commands explain that a desktop or remote host is required |
 | Development and packaging runtime | Node.js 22 or newer | Required only for contributors and release builds; the published VSIX bundles its runtime dependencies |
 
-The adapter currently classifies compatibility by the Bend compiler major version. A `2.x.y` compiler is accepted by the compatibility gate, while minor and patch differences are reported in the status bar and release notes. Individual language features still depend on the compiler revision that provides them.
+The adapter currently classifies compatibility by the Bend compiler major version. This runtime gate is broader than the release support claim: it does not make every `2.x.y` compiler a verified version. The 1.0 release notes must name the exact minimum and latest stable versions tested for that release. Bend `2.0.25` is the minimum verification target and `2.0.27` is the latest official stable release observed on 2026-09-23 ([Bend 2.0.25](https://github.com/bendlang/bend/releases/tag/v2.0.25), [Bend 2.0.27](https://github.com/bendlang/bend/releases/tag/v2.0.27)). Both official checksum-verified binaries passed dogfood and desktop integration in the [1.0 preparation CI run](https://github.com/nuxyel/bend2-vscode/actions/runs/35936002144). This is candidate evidence and does not expand the published `0.1.0` preview's support claim. Refresh the latest pin when the release candidate is prepared and repeat the matrix on the final tagged commit.
+
+The VS Code Web host supports process-free editing features such as parsing, formatting and workspace navigation. `check`, `run`, build and compiler-backed proof checks require a desktop or remote extension host that can launch Bend.
 
 ## Deprecation policy
 

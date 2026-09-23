@@ -6,9 +6,10 @@ Proof-aware language support and developer tools for [Bend 2](https://github.com
 
 - Syntax highlighting, snippets, indentation, folding, semantic tokens and outline symbols.
 - Completion, hover, go to definition, type definition, references, rename and workspace symbol search.
+- Signature Help for local and imported functions, including available parameter annotations; signatures are parser-derived rather than inferred.
 - Direct call hierarchy for indexed Bend functions and laws.
 - Local import links and optional automatic import edits through `bend2.autoImport`.
-- Parser diagnostics by default, with compiler diagnostics on save or while typing.
+- Parser diagnostics while editing, with compiler diagnostics on save by default or while typing when selected.
 - Bundled Bend 2 formatter with comment, line-ending and final-newline preservation.
 - Proof Explorer for `LAWS.bend` and `PROOF.bend`, including `proved`, `open`, `failed`, `unsafe`, `foreign`, `not checked` and `missing proof` states.
 - Test Explorer checks for discovered `PROOF.bend` files.

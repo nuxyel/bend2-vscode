@@ -23,6 +23,9 @@ import {
   SemanticTokensRangeParams,
   SymbolKind,
   SymbolInformation,
+  SignatureHelp,
+  SignatureInformation,
+  ParameterInformation,
   TextDocuments,
   TextDocumentSyncKind,
   TextDocumentPositionParams,
@@ -45,12 +48,17 @@ import { BendWorkspaceIndex } from "./semanticIndex.js";
 import { platformMismatchMessage } from "./environment.js";
 import { semanticTokens, tokenModifiers, tokenTypes } from "./semanticTokens.js";
 import { CheckScheduler } from "./checkScheduler.js";
+import { callContextAt, parseBendSignature } from "./signatureHelp.js";
+import { resolveValidationMode, ValidationMode } from "./validationMode.js";
 
 const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments(TextDocument);
 const parsed = new Map<string, ReturnType<typeof parseBend>>();
 let workspaceRoot = "";
-let validationMode: "parser" | "onSave" | "onType" | "off" = "parser";
+let validationMode: ValidationMode = "onSave";
+let validationModeExplicit = false;
+let legacyValidationEnabled = true;
+let configuredValidationMode: ValidationMode | undefined;
 let formattingEnabled = true;
 let executablePath = "bend";
 let executableArgs: string[] = [];
@@ -236,6 +244,7 @@ connection.onInitialize((params: InitializeParams) => {
     capabilities: {
       textDocumentSync: { openClose: true, change: TextDocumentSyncKind.Incremental, save: { includeText: true } },
       completionProvider: { triggerCharacters: [".", ":"] },
+      signatureHelpProvider: { triggerCharacters: ["(", ","], retriggerCharacters: [","] },
       hoverProvider: true,
       definitionProvider: true,
       typeDefinitionProvider: true,
@@ -260,9 +269,12 @@ connection.onInitialized(() => {
 });
 
 connection.onDidChangeConfiguration((params: DidChangeConfigurationParams) => {
-  const settings = params.settings as { bend2?: { validation?: boolean; validationMode?: "parser" | "onSave" | "onType" | "off"; executablePath?: string; executableArgs?: string[]; diagnosticsMode?: DiagnosticsMode; autoImport?: boolean; formatterMode?: "bundled" | "disabled" } };
+  const settings = params.settings as { bend2?: { validation?: boolean; validationMode?: "parser" | "onSave" | "onType" | "off"; validationModeExplicit?: boolean; executablePath?: string; executableArgs?: string[]; diagnosticsMode?: DiagnosticsMode; autoImport?: boolean; formatterMode?: "bundled" | "disabled" } };
   const configuredMode = settings.bend2?.validationMode;
-  validationMode = configuredMode ?? (settings.bend2?.validation === false ? "off" : "parser");
+  configuredValidationMode = configuredMode;
+  legacyValidationEnabled = settings.bend2?.validation !== false;
+  validationModeExplicit = settings.bend2?.validationModeExplicit === true;
+  validationMode = resolveValidationMode({ configuredMode, legacyValidation: legacyValidationEnabled, modeExplicit: validationModeExplicit });
   executablePath = settings.bend2?.executablePath ?? "bend";
   executableArgs = settings.bend2?.executableArgs ?? [];
   diagnosticsMode = settings.bend2?.diagnosticsMode ?? "auto";
@@ -275,6 +287,12 @@ connection.onDidChangeConfiguration((params: DidChangeConfigurationParams) => {
   index = new BendWorkspaceIndex(workspaceRoot);
   index.initialize();
   refreshIndexCompilerVersion(toolchain, index);
+  for (const document of documents.all()) publishDiagnostics(document.uri);
+});
+
+connection.onRequest("bend2/validationModeExplicitness", (params: { explicit: boolean }) => {
+  validationModeExplicit = params.explicit;
+  validationMode = resolveValidationMode({ configuredMode: configuredValidationMode, legacyValidation: legacyValidationEnabled, modeExplicit: validationModeExplicit });
   for (const document of documents.all()) publishDiagnostics(document.uri);
 });
 
@@ -323,6 +341,42 @@ connection.onCompletion(async (params): Promise<CompletionItem[]> => {
     }
   }
   return items;
+});
+
+connection.onSignatureHelp(async (params): Promise<SignatureHelp | null> => {
+  const document = documents.get(params.textDocument.uri);
+  if (!document || !index) return null;
+  const source = document.getText();
+  const offset = document.offsetAt(params.position);
+  const context = callContextAt(source, offset);
+  if (!context) return null;
+  const callNameStart = source.slice(0, offset).lastIndexOf(context.name);
+  const before = source.slice(0, callNameStart);
+  const line = before.split(/\r?\n/).length - 1;
+  const character = (before.split(/\r?\n/).at(-1) ?? "").length;
+  let target;
+  if (context.name.includes(".")) {
+    const [alias, ...memberParts] = context.name.split(".");
+    const memberName = memberParts.join(".");
+    const imported = index.get(document.uri)?.parsed.imports.find((item) => item.alias === alias)?.resolvedUri;
+    if (imported && !index.get(imported)) await index.reload(imported);
+    const importedDocument = imported ? index.get(imported) : undefined;
+    const importedSymbol = importedDocument?.parsed.symbols.find((symbol) => symbol.name === memberName || symbol.name.split(".").at(-1) === memberName);
+    if (importedDocument && importedSymbol) target = { uri: importedDocument.uri, symbol: { ...importedSymbol, uri: importedDocument.uri, provenance: importedDocument.provenance } };
+  }
+  target ??= await index.definition(document.uri, { line, character });
+  if (!target || !["function", "law"].includes(target.symbol.kind)) return null;
+  const targetDocument = index.get(target.uri);
+  if (!targetDocument) return null;
+  const signature = parseBendSignature(targetDocument.source, target.symbol.name.split(".").at(-1) ?? target.symbol.name);
+  if (!signature) return null;
+  const parameters = signature.parameters.map((parameter) => ParameterInformation.create(parameter.label));
+  const activeParameter = Math.min(context.activeParameter, Math.max(0, parameters.length - 1));
+  return {
+    signatures: [SignatureInformation.create(signature.label, undefined, ...parameters)],
+    activeSignature: 0,
+    activeParameter,
+  };
 });
 
 connection.onHover(async (params: TextDocumentPositionParams): Promise<Hover | null> => {

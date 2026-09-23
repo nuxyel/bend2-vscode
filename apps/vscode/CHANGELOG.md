@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Compiler validation now defaults to save while lightweight parser diagnostics stay active during editing; an explicitly selected validation mode takes precedence over the deprecated compatibility setting.
+- Added Signature Help for local and imported Bend functions, including annotated parameters and nested type delimiters. Its signatures are parser-derived and are not type-inference results.
+- Documented the 1.0 compiler verification matrix policy and the process requirements for compiler-backed features in VS Code Web.
+- Added a checked-in Bend proof project and pinned, checksum-verified CI runs for its minimum and latest supported compiler versions; desktop integration now opens the project and exercises imported navigation and Signature Help.
 - Cross-file references and rename now verify each candidate through workspace definition resolution, avoiding edits to homonymous declarations in importing files.
 - Compiler validation now uses Bend's `--check-only` mode so checking a file never executes its `main`; older launchers receive a compatibility fallback only for files without a runnable `main`.
 - Recorded the Bend 2.0.23 compiler revision used to capture the human-readable diagnostic fixture.
