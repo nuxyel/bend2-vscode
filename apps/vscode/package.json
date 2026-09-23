@@ -140,7 +140,7 @@
         "bend2.validationMode": {
           "type": "string",
           "enum": ["parser", "onSave", "onType", "off"],
-          "default": "parser",
+          "default": "onSave",
           "description": "%configuration.validationMode%"
         },
         "bend2.diagnosticsMode": {

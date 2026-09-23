@@ -28,7 +28,7 @@
   "configuration.executablePath": "Path to the Bend 2 executable.",
   "configuration.executableArgs": "Arguments passed before the Bend 2 command arguments; useful for WSL, SSH or container launchers (for example [\"bend\"]).",
   "configuration.validation": "Deprecated compatibility setting. Use bend2.validationMode instead.",
-  "configuration.validationMode": "Choose lightweight parser diagnostics, Bend 2 compiler checks on save or while typing, or disable diagnostics.",
+  "configuration.validationMode": "Choose parser-only diagnostics, Bend 2 compiler checks on save (default) or while typing, or disable diagnostics. Parser diagnostics remain available while editing.",
   "configuration.diagnosticsMode": "Select compiler diagnostic transport. Auto accepts structured JSON when available and falls back to text; JSON requests the experimental --diagnostics=json flag when supported by the compiler.",
   "configuration.autoImport": "Offer imported workspace symbols with an additional import edit. Disabled by default because completion can modify the current file.",
   "configuration.formatterMode": "Use the pinned official Bend 2 formatter or disable formatting."

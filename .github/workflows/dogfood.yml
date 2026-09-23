@@ -1,0 +1,43 @@
+name: Bend compiler dogfood
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  compiler-matrix:
+    runs-on: ubuntu-24.04
+    outputs:
+      versions: ${{ steps.matrix.outputs.versions }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - id: matrix
+        run: node scripts/dogfood-matrix.mjs >> "$GITHUB_OUTPUT"
+
+  proof-and-editor:
+    needs: compiler-matrix
+    strategy:
+      fail-fast: false
+      matrix:
+        bend-version: ${{ fromJSON(needs.compiler-matrix.outputs.versions) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      BEND_DOGFOOD_VERSION: ${{ matrix.bend-version }}
+      BEND2_DOGFOOD_REQUIRED: "true"
+      VSCODE_VERSION: stable
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install
+      - run: node scripts/install-dogfood-compiler.mjs "$BEND_DOGFOOD_VERSION"
+      - run: npm run test:dogfood
+      - run: xvfb-run -a npm run test:integration

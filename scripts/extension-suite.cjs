@@ -36,6 +36,46 @@ suite("Bend 2 extension", () => {
     assert.ok((await vscode.languages.getLanguages()).includes("bend"), "Bend language was not registered.");
   });
 
+  test("opens the repository dogfood project with imported Bend editor features", async function () {
+    this.timeout(10000);
+    if (process.env.BEND2_DOGFOOD_REQUIRED === "true" && process.env.BEND_EXECUTABLE) {
+      const settings = vscode.workspace.getConfiguration("bend2");
+      await settings.update("executablePath", process.env.BEND_EXECUTABLE, vscode.ConfigurationTarget.Global);
+      if (process.env.BEND_EXECUTABLE_ARGS) {
+        const executableArgs = JSON.parse(process.env.BEND_EXECUTABLE_ARGS);
+        assert.ok(Array.isArray(executableArgs) && executableArgs.every((argument) => typeof argument === "string"), "BEND_EXECUTABLE_ARGS must be a JSON array of strings.");
+        await settings.update("executableArgs", executableArgs, vscode.ConfigurationTarget.Global);
+      }
+    }
+    const workspace = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    const expectedWorkspace = path.resolve(__dirname, "..", "tests", "dogfood", "proof-project");
+    assert.equal(path.resolve(workspace ?? ""), expectedWorkspace, "The desktop smoke test must open the maintained Bend dogfood project.");
+    const appFile = path.join(expectedWorkspace, "app.bend");
+    const document = await vscode.workspace.openTextDocument(vscode.Uri.file(appFile));
+    await vscode.window.showTextDocument(document);
+    const callPosition = new vscode.Position(4, 22);
+    const deadline = Date.now() + 5000;
+    let signature;
+    let definition;
+    do {
+      signature = await vscode.commands.executeCommand("vscode.executeSignatureHelpProvider", document.uri, callPosition, "(");
+      definition = await vscode.commands.executeCommand("vscode.executeDefinitionProvider", document.uri, new vscode.Position(4, 9));
+      if (signature?.signatures?.length && Array.isArray(definition) && definition.length > 0) break;
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    } while (Date.now() < deadline);
+    assert.match(signature?.signatures?.[0]?.label ?? "", /add_zero\(value: Nat\)/);
+    assert.ok(definition.some((location) => location.uri.fsPath === path.join(expectedWorkspace, "main.bend")), "Imported Go to Definition did not open the dogfood module.");
+
+    if (process.env.BEND2_DOGFOOD_REQUIRED === "true") {
+      const lawFile = vscode.Uri.file(path.join(expectedWorkspace, "LAWS.bend"));
+      const proofFile = vscode.Uri.file(path.join(expectedWorkspace, "PROOF.bend"));
+      const proofPassed = await vscode.commands.executeCommand("bend2.checkProof", lawFile.toString(), "adding_zero_preserves_value");
+      assert.equal(proofPassed, true, "The extension did not complete a successful compiler-backed check for the dogfood proof.");
+      const errors = vscode.languages.getDiagnostics(proofFile).filter((diagnostic) => diagnostic.severity === vscode.DiagnosticSeverity.Error);
+      assert.deepEqual(errors, [], "The extension published errors for the compiler-verified dogfood proof.");
+    }
+  });
+
   test("provides symbols and parser diagnostics for an opened Bend file", async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "bend2-vscode-integration-"));
     const file = path.join(root, "main.bend");
@@ -57,7 +97,16 @@ suite("Bend 2 extension", () => {
       }
       assert.ok(diagnostics.some((diagnostic) => /Open proof goal|Duplicate declaration/.test(diagnostic.message)), "The language server did not publish parser diagnostics.");
     } finally {
-      await fs.rm(root, { recursive: true, force: true });
+      await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        try {
+          await fs.rm(root, { recursive: true, force: true });
+          break;
+        } catch (error) {
+          if (attempt === 4) throw error;
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+      }
     }
   });
 
@@ -143,6 +192,43 @@ suite("Bend 2 extension", () => {
         { tabSize: 2, insertSpaces: true },
       );
       assert.ok(Array.isArray(edits), "The language server did not return document formatting edits.");
+    } finally {
+      await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        try {
+          await fs.rm(root, { recursive: true, force: true });
+          break;
+        } catch (error) {
+          if (attempt === 4) throw error;
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+      }
+    }
+  });
+
+  test("provides local and imported function signatures with active parameters", async function () {
+    this.timeout(10000);
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "bend2-vscode-signature-"));
+    const library = path.join(root, "lib.bend");
+    const main = path.join(root, "main.bend");
+    await fs.writeFile(library, "def imported(first: Nat, second: List(Nat)):\n  first\n");
+    await fs.writeFile(main, "import ./lib.bend as Lib\ndef local(a: Nat, b: Option((Nat, Nat))):\n  a\ndef main():\n  local(0, )\n  Lib.imported(0, )\n");
+    try {
+      const document = await vscode.workspace.openTextDocument(vscode.Uri.file(main));
+      await vscode.window.showTextDocument(document);
+      const deadline = Date.now() + 5000;
+      let localHelp;
+      let importedHelp;
+      do {
+        localHelp = await vscode.commands.executeCommand("vscode.executeSignatureHelpProvider", document.uri, new vscode.Position(4, 11), ",");
+        importedHelp = await vscode.commands.executeCommand("vscode.executeSignatureHelpProvider", document.uri, new vscode.Position(5, 18), ",");
+        if (localHelp?.signatures?.length && importedHelp?.signatures?.length) break;
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      } while (Date.now() < deadline);
+      assert.match(localHelp?.signatures?.[0]?.label ?? "", /local\(a: Nat, b: Option\(\(Nat, Nat\)\)\)/);
+      assert.equal(localHelp?.activeParameter, 1);
+      assert.match(importedHelp?.signatures?.[0]?.label ?? "", /imported\(first: Nat, second: List\(Nat\)\)/);
+      assert.equal(importedHelp?.activeParameter, 1);
     } finally {
       await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
       for (let attempt = 0; attempt < 5; attempt += 1) {

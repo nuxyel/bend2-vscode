@@ -30,8 +30,15 @@ Requirements:
 ```bash
 npm install
 npm run check
+npm run test:dogfood
 npm run package
 ```
+
+The dogfood command runs the checked-in `LAWS.bend`/`PROOF.bend` project with a
+compiler version from `tests/dogfood/compiler-versions.json`. On Linux or WSL,
+install the pinned release first with `node scripts/install-dogfood-compiler.mjs <version>`;
+the installer verifies the official release checksum. The regular
+cross-platform `npm run check` does not require Bend.
 
 The VS Code host smoke test can be run separately with `npm run test:integration`; set `VSCODE_VERSION=insiders` to target Insiders.
 

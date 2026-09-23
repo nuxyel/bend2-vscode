@@ -133,11 +133,11 @@ async function checkFile(): Promise<void> {
   publishCommandDiagnostics([{ fallbackFile: document.uri.fsPath, diagnostics: result.diagnostics }]);
 }
 
-async function checkProof(uri: string, lawName: string): Promise<void> {
+async function checkProof(uri: string, lawName: string): Promise<boolean> {
   const lawUri = vscode.Uri.parse(uri);
   const proofFile = vscode.Uri.file(path.join(path.dirname(lawUri.fsPath), "PROOF.bend"));
   const adapter = toolchain();
-  if (!adapter) return;
+  if (!adapter) return false;
   const output = vscode.window.createOutputChannel("Bend 2 Proof Check");
   output.show(true);
   const result = await adapter.check(proofFile.fsPath);
@@ -150,6 +150,7 @@ async function checkProof(uri: string, lawName: string): Promise<void> {
   publishCommandDiagnostics([{ fallbackFile: proofFile.fsPath, diagnostics: result.diagnostics }]);
   if (result.code === 0) vscode.window.showInformationMessage(`Proof '${lawName}' passed.`);
   else vscode.window.showWarningMessage(`Proof '${lawName}' failed or could not be checked.`);
+  return result.code === 0;
 }
 
 async function reviewLawChanges(): Promise<void> {
@@ -687,7 +688,7 @@ async function copySupportDiagnostics(context: vscode.ExtensionContext): Promise
       source: compiler.source,
     } : null,
     settings: {
-      validationMode: settings.get<string>("validationMode", "parser"),
+      validationMode: settings.get<string>("validationMode", "onSave"),
       diagnosticsMode: settings.get<string>("diagnosticsMode", "auto"),
       autoImport: settings.get<boolean>("autoImport", false),
       formatterMode: settings.get<string>("formatterMode", "bundled"),
@@ -728,6 +729,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   void updateCompilerStatus();
   context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((event) => {
     if (event.affectsConfiguration("bend2")) void updateCompilerStatus();
+    if (event.affectsConfiguration("bend2.validationMode")) void syncValidationModeExplicitness();
   }));
 
   const proofExplorer = new ProofExplorer(context);
@@ -760,7 +762,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     };
     client = new LanguageClient("bend2-language-server", "Bend 2 Language Server", serverOptions, clientOptions);
     context.subscriptions.push(client);
-    void client.start();
+    void client.start().then(() => syncValidationModeExplicitness());
   }
 
   context.subscriptions.push(
@@ -787,6 +789,17 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       await client?.restart();
     }),
   );
+}
+
+async function syncValidationModeExplicitness(): Promise<void> {
+  if (!client) return;
+  const inspection = vscode.workspace.getConfiguration("bend2").inspect<string>("validationMode");
+  const explicit = Boolean(inspection && [inspection.globalValue, inspection.workspaceValue, inspection.workspaceFolderValue, inspection.globalLanguageValue, inspection.workspaceLanguageValue, inspection.workspaceFolderLanguageValue].some((value) => value !== undefined));
+  try {
+    await client.sendRequest("bend2/validationModeExplicitness", { explicit });
+  } catch {
+    // The language client may still be starting or shutting down.
+  }
 }
 
 export async function deactivate(): Promise<void> {

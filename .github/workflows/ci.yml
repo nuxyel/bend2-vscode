@@ -51,6 +51,9 @@ jobs:
       - run: npm install
       - run: npm run test:web
 
+  dogfood:
+    uses: ./.github/workflows/dogfood.yml
+
   package:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
