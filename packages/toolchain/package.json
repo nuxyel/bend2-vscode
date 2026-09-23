@@ -1,0 +1,17 @@
+{
+  "name": "@bend2/toolchain",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Safe Bend 2 compiler discovery and process integration.",
+  "license": "Apache-2.0",
+  "type": "commonjs",
+  "main": "dist/toolchain.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test dist/test/*.test.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.9.0"
+  }
+}

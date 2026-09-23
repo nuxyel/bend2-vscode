@@ -1,0 +1,8 @@
+Bend 2 Tools for VS Code includes formatter logic derived from the official Bend 2
+`bend-fmt-lsp` implementation:
+
+  https://github.com/bendlang/bend/tree/main/tools/bend-fmt-lsp
+
+The formatter is adapted into the language server and remains subject to the
+upstream project's license and attribution requirements. See the source header
+in `packages/language-server/src/officialFormatter.ts`.

@@ -1,0 +1,37 @@
+name: Release metadata
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+
+jobs:
+  metadata:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install
+      - run: npm run release:metadata
+      - run: npm run verify-release-metadata
+      - name: Generate signed VSIX provenance attestation
+        uses: actions/attest@v4
+        with:
+          subject-path: 'apps/vscode/*.vsix'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bend2-vscode-release-metadata
+          path: artifacts/release/
+          if-no-files-found: error

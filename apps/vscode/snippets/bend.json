@@ -1,0 +1,35 @@
+{
+  "Bend function": {
+    "prefix": "def",
+      "body": [
+      "def ${1:name}(${2:x: Nat}) -> ${3:Nat}:",
+      "  ${0:body}"
+    ],
+    "description": "Create a Bend 2 definition"
+  },
+  "Bend law": {
+    "prefix": "law",
+    "body": [
+      "law ${1:name}:",
+      "  for ${2:x}: ${3:Nat}",
+      "  {${0:proposition} : ${4:Bool}}"
+    ],
+    "description": "Create a Bend 2 law declaration"
+  },
+  "Bend proof match": {
+    "prefix": "match",
+    "body": [
+      "match ${1:value}:",
+      "  case ${2:pattern}:",
+      "    ${0:body}"
+    ],
+    "description": "Create a Bend 2 match expression"
+  },
+  "Bend parallel call": {
+    "prefix": "parallel",
+    "body": [
+      "${1:left} ${2:right} = ${3:leftCall} ${4:rightCall}"
+    ],
+    "description": "Create a fork-join parallel call"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "comments": {
+    "lineComment": "#"
+  },
+  "brackets": [["(", ")"], ["[", "]"], ["{", "}"]],
+  "autoClosingPairs": [["(", ")"], ["[", "]"], ["{", "}"], ["\"", "\""]],
+  "surroundingPairs": [["(", ")"], ["[", "]"], ["{", "}"], ["\"", "\""]],
+  "indentationRules": {
+    "increaseIndentPattern": "^\\s*(def|law|type|match|case|do|for)\\b.*:\\s*$",
+    "decreaseIndentPattern": "^\\s*(case)\\b"
+  },
+  "folding": {
+    "markers": {
+      "start": "^\\s*#region\\b",
+      "end": "^\\s*#endregion\\b"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "name": "WSL",
+    "executable": "wsl.exe",
+    "arguments": ["--distribution", "Ubuntu", "--exec", "bend"]
+  },
+  {
+    "name": "SSH",
+    "executable": "ssh",
+    "arguments": ["bend-host", "bend"]
+  },
+  {
+    "name": "Dev Container",
+    "executable": "docker",
+    "arguments": ["exec", "bend-dev", "bend"]
+  },
+  {
+    "name": "Codespaces",
+    "executable": "codespaces-bend",
+    "arguments": ["bend"]
+  }
+]

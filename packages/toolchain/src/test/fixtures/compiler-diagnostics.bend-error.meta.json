@@ -1,0 +1,8 @@
+{
+  "compiler": "https://github.com/bendlang/bend",
+  "revision": "fd7d9e652f31ca4ec560d36f159954aece108795",
+  "version": "2.0.23",
+  "command": ["bend", "file.bend", "--check-only"],
+  "capturedAt": "2026-09-20",
+  "notes": "Human-readable Error/Location output captured from the official Bend CLI."
+}

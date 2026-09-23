@@ -1,0 +1,182 @@
+{
+  "name": "bend2-vscode",
+  "displayName": "%extension.displayName%",
+  "description": "%extension.description%",
+  "version": "0.1.0",
+  "publisher": "nuxyel",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nuxyel/bend2-vscode"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Other"
+  ],
+  "keywords": ["bend", "bend2", "proof", "parallel", "gpu", "language-server"],
+  "main": "./dist/extension.js",
+  "browser": "./dist/browser.js",
+  "extensionKind": ["workspace"],
+  "files": [
+    "dist/extension.js",
+    "dist/browser.js",
+    "dist/browserWorker.js",
+    "server/server.js",
+    "syntaxes/**",
+    "snippets/**",
+    "images/**",
+    "language-configuration.json",
+    "README.md",
+    "package.nls.json",
+    "LICENSE",
+    "NOTICE",
+    "CHANGELOG.md"
+  ],
+  "activationEvents": [
+    "onLanguage:bend",
+    "workspaceContains:**/*.bend"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "bend",
+        "aliases": ["Bend 2", "bend2", "Bend"],
+        "extensions": [".bend"],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "images/bend-light.svg",
+          "dark": "images/bend-dark.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "bend",
+        "scopeName": "source.bend",
+        "path": "./syntaxes/bend.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "bend",
+        "path": "./snippets/bend.json"
+      }
+    ],
+    "commands": [
+      { "command": "bend2.checkFile", "title": "%command.checkFile%", "icon": "$(check)" },
+      { "command": "bend2.checkWorkspace", "title": "%command.checkWorkspace%", "icon": "$(check-all)" },
+      { "command": "bend2.runProjectGate", "title": "%command.runProjectGate%", "icon": "$(verified)" },
+      { "command": "bend2.runSabotage", "title": "%command.runSabotage%", "icon": "$(beaker)" },
+      { "command": "bend2.buildFile", "title": "%command.buildFile%", "icon": "$(tools)" },
+      { "command": "bend2.runFile", "title": "%command.runFile%", "icon": "$(play)" },
+      { "command": "bend2.probeBackend", "title": "%command.probeBackend%", "icon": "$(pulse)" },
+      { "command": "bend2.compareBackends", "title": "%command.compareBackends%", "icon": "$(split-horizontal)" },
+      { "command": "bend2.compareProjectBackends", "title": "%command.compareProjectBackends%", "icon": "$(split-horizontal)" },
+      { "command": "bend2.benchmarkFile", "title": "%command.benchmarkFile%", "icon": "$(pulse)" },
+      { "command": "bend2.showBase", "title": "%command.showBase%" },
+      { "command": "bend2.showVersion", "title": "%command.showVersion%" },
+      { "command": "bend2.showExecutionEnvironment", "title": "%command.showExecutionEnvironment%", "icon": "$(server-environment)" },
+      { "command": "bend2.copySupportDiagnostics", "title": "%command.copySupportDiagnostics%" },
+      { "command": "bend2.restartLanguageServer", "title": "%command.restartLanguageServer%" },
+      { "command": "bend2.openProof", "title": "%command.openProof%" },
+      { "command": "bend2.showProofDetails", "title": "%command.showProofDetails%" },
+      { "command": "bend2.showProofGoal", "title": "%command.showProofGoal%" },
+      { "command": "bend2.checkProof", "title": "%command.checkProof%", "icon": "$(check)" },
+      { "command": "bend2.reviewLawChanges", "title": "%command.reviewLawChanges%", "icon": "$(diff)" },
+      { "command": "bend2.refreshProofExplorer", "title": "%command.refreshProofExplorer%", "icon": "$(refresh)" }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        { "id": "bend2", "title": "%viewContainer.title%", "icon": "$(law)" }
+      ]
+    },
+    "views": {
+      "bend2": [
+        { "id": "bend2.proofExplorer", "name": "%view.proofExplorer%", "when": "workspaceFolderCount > 0 && !isWeb" }
+      ]
+    },
+    "menus": {
+      "editor/title": [
+        { "command": "bend2.checkFile", "when": "resourceLangId == bend", "group": "navigation@1" },
+        { "command": "bend2.buildFile", "when": "resourceLangId == bend", "group": "navigation@2" },
+        { "command": "bend2.runFile", "when": "resourceLangId == bend", "group": "navigation@3" },
+        { "command": "bend2.compareBackends", "when": "resourceLangId == bend", "group": "navigation@4" },
+        { "command": "bend2.benchmarkFile", "when": "resourceLangId == bend", "group": "navigation@5" }
+      ],
+      "editor/context": [
+        { "command": "bend2.checkFile", "when": "resourceLangId == bend", "group": "navigation" },
+        { "command": "bend2.buildFile", "when": "resourceLangId == bend", "group": "navigation" },
+        { "command": "bend2.runFile", "when": "resourceLangId == bend", "group": "navigation" },
+        { "command": "bend2.compareBackends", "when": "resourceLangId == bend", "group": "navigation" },
+        { "command": "bend2.benchmarkFile", "when": "resourceLangId == bend", "group": "navigation" }
+      ],
+      "view/item/context": [
+        { "command": "bend2.showProofDetails", "when": "view == bend2.proofExplorer && viewItem == bend2Law", "group": "inline" }
+      ]
+    },
+    "configuration": {
+      "title": "%configuration.title%",
+      "properties": {
+        "bend2.executablePath": {
+          "type": "string",
+          "default": "bend",
+          "description": "%configuration.executablePath%"
+        },
+        "bend2.executableArgs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "%configuration.executableArgs%"
+        },
+        "bend2.validation": {
+          "type": "boolean",
+          "default": true,
+          "description": "%configuration.validation%"
+        },
+        "bend2.validationMode": {
+          "type": "string",
+          "enum": ["parser", "onSave", "onType", "off"],
+          "default": "parser",
+          "description": "%configuration.validationMode%"
+        },
+        "bend2.diagnosticsMode": {
+          "type": "string",
+          "enum": ["auto", "text", "json"],
+          "default": "auto",
+          "description": "%configuration.diagnosticsMode%"
+        },
+        "bend2.autoImport": {
+          "type": "boolean",
+          "default": false,
+          "description": "%configuration.autoImport%"
+        },
+        "bend2.formatterMode": {
+          "type": "string",
+          "enum": ["bundled", "disabled"],
+          "default": "bundled",
+          "description": "%configuration.formatterMode%"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "package": "node ../../scripts/package-vsix.mjs"
+  },
+  "dependencies": {
+    "@bend2/language-server": "0.1.0",
+    "@bend2/toolchain": "0.1.0",
+    "vscode-languageclient": "^10.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.90.0",
+    "typescript": "^5.9.0",
+    "@vscode/vsce": "^3.6.0"
+  }
+}

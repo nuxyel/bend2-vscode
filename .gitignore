@@ -1,0 +1,10 @@
+node_modules/
+dist/
+out/
+apps/vscode/server/
+*.vsix
+artifacts/
+.vscode-test/
+.vscode-test-web/
+.DS_Store
+npm-debug.log*

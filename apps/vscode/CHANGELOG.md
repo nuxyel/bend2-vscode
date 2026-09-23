@@ -1,0 +1,131 @@
+# Change Log
+
+## Unreleased
+
+- Cross-file references and rename now verify each candidate through workspace definition resolution, avoiding edits to homonymous declarations in importing files.
+- Compiler validation now uses Bend's `--check-only` mode so checking a file never executes its `main`; older launchers receive a compatibility fallback only for files without a runnable `main`.
+- Recorded the Bend 2.0.23 compiler revision used to capture the human-readable diagnostic fixture.
+- Surface successful compiler checks that still rely on unsafe or foreign definitions as warnings.
+- Navigate safety warnings to the matching local definition when the compiler report includes its name.
+- Deduplicate Test Explorer runs when a proof suite and one of its law cases are selected together.
+- Proof Explorer now compares inferred unsafe/foreign proof dependencies with the entries in `UNSAFE_OK`.
+- Explicit check, proof and gate commands now publish compiler diagnostics to the Problems panel as well as their Output channel.
+- Structured related compiler notes now remain navigable from command diagnostics in the Problems panel.
+- VS Code Web hovers now show the complete declaration for symbols in the active document.
+- Web workspace hovers now retain complete declarations for indexed cross-file symbols as well.
+- Local symbol hovers now show the complete Bend declaration line instead of only the symbol name.
+- Updated GitHub Actions checkout and Node setup steps to the current Node 24-compatible major releases.
+- Pinned Linux CI and release jobs to Ubuntu 24.04 instead of the moving `ubuntu-latest` label.
+- Release verification now checks required Marketplace metadata and every English localization reference in the packaged manifest.
+- Parse the current Bend CLI `Error:` / `Location:` reports into Problems-panel diagnostics with source-line navigation, expected/observed details and import classification.
+
+## 0.1.0
+
+- Added desktop and Web host integration coverage for opened-file symbols and diagnostics, including cross-file Web indexing through the browser worker.
+- Web indexing now includes open Bend buffers when a virtual or remote file provider does not return them through `findFiles`.
+- Documented the current upstream compiler boundary and the requirements for a future public AST and structured-diagnostics interface.
+- Added cross-platform toolchain coverage for active-process cancellation and launcher argument ordering.
+- Added automated accessibility-contract coverage for Proof Details landmarks, focusable code blocks and live proof status.
+- Extension shutdown now cancels active compiler processes through the shared toolchain lifecycle registry.
+- Release publishing now gates marketplace upload on the full build, desktop integration and Web smoke suites.
+- Desktop integration coverage now exercises real LSP references, rename edits and type-definition navigation.
+- Desktop integration coverage now also exercises incoming and outgoing call hierarchy.
+- Desktop integration coverage now also exercises real LSP completion, hover and document formatting providers.
+- Added LSP semantic-token range handling for hosts that request incremental editor ranges.
+- Added semantic-token unit coverage for full-document legends and line-bounded range results.
+- Added browser-host completion and hover for local and indexed cross-file symbols, with Web integration coverage.
+- Added browser-host references and rename edits across indexed Bend files, with Web integration coverage.
+- Added browser-host folding ranges and semantic-token providers for parser-backed editor structure.
+- Added browser-host cross-file type-definition navigation with Web integration coverage.
+- Web references and rename now include the active open document even when it is not inside a workspace folder.
+- Added browser-host document links for relative Bend imports.
+- Added isolated benchmark-presentation coverage so speedup is reported only for comparable, stable outputs.
+- Added VS Code host coverage for incomplete and 350-declaration Bend fixtures.
+- Added a dedicated CI packaging job that verifies reproducible VSIX output and required archive contents.
+- Structured compiler diagnostics now retain unknown diagnostic and note fields for forward-compatible clients.
+- Added automated accessibility-label coverage for every Proof Explorer state and the compiler status item.
+- Release workflows now verify SBOM and provenance metadata against the exact VSIX hash, manifest and commit before attestation or publication.
+- Workspace indexing now bounds concurrent file reads and includes large-workspace coverage.
+- Language-server compiler checks now remain cancellable after launch and are aborted on reconfiguration, document close or shutdown.
+- Failed language-server check promises are now consumed and cleaned up without unhandled rejections.
+- Proof Details now prefers structured compiler proof context when available, while retaining the local fallback.
+- Release packages now contain only the final extension, web, worker and language-server bundles instead of development tests and source maps.
+- Expanded the extension command reference to cover backend probes, environment diagnostics, support reports and Proof Explorer actions.
+- Added explicit remote-environment classification for WSL, SSH, Dev Containers, Codespaces and web sessions, with coverage for actionable host-mismatch diagnostics.
+- Improved web workspaces with a version-aware cross-file symbol/definition index that invalidates entries when documents change or disappear.
+- Added a conservative warning for visibly unbalanced fork/join call branches, with wording that requires measurement before claiming a speedup.
+- Preserved optional structured proof categories, context and dependencies through compiler diagnostics and the Proof Explorer details panel.
+- Added an opt-in `bend2.compareProjectBackends` command for validated multi-input suites declared in `.bend2/differential.json`.
+- Added `bend2.executableArgs` for WSL, SSH and container launchers that need arguments before the Bend command.
+- Workspace indexing now receives Bend file create/change/delete events, keeping cross-file navigation fresh even when the changed file is not open.
+- Added parser-backed duplicate-declaration and open-proof-goal diagnostics to the VS Code Web entrypoint.
+- Added a read-only “Show Proof Goal” CodeLens action that focuses the open goal and displays compiler context when available.
+- Normalized text-fallback diagnostics now classify open goals, unsafe markers, foreign dependencies and import failures consistently.
+- Added parser diagnostics for `@unsafe` and `foreign` proof markers, including an explicit `UNSAFE_OK` review message.
+- Kept the same unsafe/foreign proof diagnostics available in the VS Code Web parser.
+- Proof Explorer now distinguishes `not checked` from `proved` when no compiler result is available.
+- Web workspace indexing now invalidates on content changes even when a closed document keeps the same version number.
+- Test Explorer now exposes laws as child cases while clearly reporting that the compiler checks the containing `PROOF.bend` file.
+- Web workspace symbol and definition indexing now runs in a bundled Web Worker with a local fallback.
+- Structured compiler results now expose their transport (`structured`, `text` or `none`) and optional protocol version.
+- Backend capability discovery now preserves explicit unsupported GPU, native, JavaScript and threading declarations instead of treating them as available.
+- Added an explicit Backend Probe command; GPU probing requires confirmation and runs the current program with `--gpu on`.
+- Added source-free Execution Environment diagnostics for the effective remote host, compiler path and launcher arguments.
+- Proof details now use semantic sections, focusable code blocks and an announced live proof-status badge.
+- Test Explorer suite runs now propagate one containing `PROOF.bend` result to all law child cases without rerunning the compiler.
+
+- Initial Bend 2 language support.
+- Standalone language server with editor intelligence foundations.
+- Compiler-backed validation modes and bundled official formatter.
+- Active compiler version and availability are visible in the status bar.
+- Structured diagnostic JSON parsing is available with a text fallback.
+- Proof Explorer law nodes show proved, open, or missing-proof status.
+- Test Explorer can run discovered `PROOF.bend` project checks.
+- Benchmark command follows the lab protocol: discarded warm-up, median of measured runs, output stability, machine metadata, and comparable speedup; GPU values include `off`, `on`, and memory limits such as `4GB`.
+- File execution now uses the non-shell toolchain adapter and reports output in a dedicated channel.
+- Compiler versions outside the Bend 2 major version are visibly marked unsupported.
+- Added safe build output and Bend Base lookup commands.
+- Base lookup results now enrich language-server completion and hover after the first request.
+- Added type-definition navigation and clickable local import links.
+- Added opt-in automatic import edits for workspace completions.
+- Added workspace-wide symbol search for functions, laws and types.
+- Added conservative call hierarchy support for direct function and law calls.
+- Proof Explorer now uses the Bend checker for proved/failed law states, with textual fallback when unavailable.
+- Workspace-aware imported definition and reference navigation.
+- Package validation now checks the generated VSIX for runtime bundles, language assets, documentation and licensing files.
+- Structured compiler diagnostics now support JSON-lines output and related notes in the Problems panel.
+- Proof Explorer flags explicit `unsafe` and `foreign` proof markers and shows reviewed `UNSAFE_OK` records.
+- Proof Explorer lists direct proof dependencies extracted from calls inside each law proof.
+- Added cancellable Project Gate and Sabotage Check commands for conventional workspace scripts.
+- Test Explorer now includes the workspace Project Gate when available.
+- Benchmark results can now be saved as source-free JSON reports.
+- Added parser fixtures for malformed, incomplete and large Bend inputs.
+- Added VS Code host smoke coverage for activation, language registration and public commands on Stable and Insiders.
+- Added release metadata generation with CycloneDX SBOM and VSIX SHA-256 provenance.
+- Added tag-driven marketplace publishing documentation and workflow for VS Code Marketplace and Open VSX.
+- Added source-free support diagnostics for issue reports.
+- Added an English localization catalog for future translated VS Code manifest packs.
+- Added a VS Code Web entrypoint with formatter support and explicit process-capability messages.
+- The extension now prefers the VS Code workspace host for remote compiler execution.
+- The Web entrypoint now provides same-file symbols and Go to Definition.
+- Structured compiler diagnostics now show expected and observed types when supplied by Bend.
+- Proof Explorer laws now open a read-only details panel with the proposition, proof body, dependencies and compiler notes.
+- Build and run commands now offer JavaScript, native CPU and GPU profiles with validated thread and GPU-memory options.
+- Backend profiles now check capability metadata from the active compiler before running.
+- Added an explicit differential backend command that reports output hashes and suppresses equivalence claims when runs are not comparable.
+- VSIX packaging now pins ZIP timestamps and ordering to the source commit for byte-for-byte reproducible archives.
+- Project Gate failures with compiler-style locations now appear as navigable Test Explorer diagnostics.
+- Law CodeLens now offers Open proof, Show proof details and Check proof actions.
+- Proof Explorer and compiler status items now include explicit screen-reader labels.
+- Release metadata now includes a signed GitHub artifact attestation for the reproducible VSIX.
+- Added a read-only law review command that displays the `LAWS.bend` diff against `HEAD`.
+- Updated compiler discovery and file checks to match the current Bend 2 CLI (`bend --version` and `bend file.bend`).
+- Added a cross-platform compiler CLI contract fixture, including Windows `.cmd` invocation and JSON-to-text diagnostic fallback.
+- Added checked-in text and JSON-lines diagnostic fixtures covering spans, severity, codes, types and related notes.
+- Workspace and web navigation now index Bend 2 datatype constructors as qualified symbols such as `Option.Some`.
+- Semantic-index results now expose explicit provisional parser provenance and compiler-version metadata.
+- The language server now refreshes index provenance with the discovered Bend compiler version without blocking startup.
+- The client and language server now exchange host-platform metadata and warn when compiler execution may occur on the wrong host.
+- Toolchain commands now honor an already-aborted signal before spawning a compiler process.
+- Proof Explorer sidebar and law navigation.
+- Bend 2 check, run and workspace commands.

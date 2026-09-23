@@ -1,0 +1,49 @@
+name: Publish extension
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      OVSX_PAT: ${{ secrets.OVSX_PAT }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install
+      - run: npm run check
+      - run: xvfb-run -a npm run test:integration
+      - run: npm run test:web
+      - run: npm run release:metadata
+      - run: npm run verify-release-metadata
+      - name: Resolve VSIX path
+        run: echo "VSIX_PATH=apps/vscode/bend2-vscode-$(node -p \"require('./apps/vscode/package.json').version\").vsix" >> "$GITHUB_ENV"
+      - name: Verify tag matches extension version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: test "${GITHUB_REF_NAME#v}" = "$(node -p "require('./apps/vscode/package.json').version")"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bend2-vscode-release
+          path: |
+            ${{ env.VSIX_PATH }}
+            artifacts/release/
+          if-no-files-found: error
+      - name: Publish to VS Code Marketplace
+        if: env.VSCE_PAT != ''
+        run: npx --yes @vscode/vsce publish --packagePath "$VSIX_PATH" --pat "$VSCE_PAT"
+      - name: Publish to Open VSX
+        if: env.OVSX_PAT != ''
+        run: npx --yes ovsx publish "$VSIX_PATH" --pat "$OVSX_PAT"
