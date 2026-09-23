@@ -11,4 +11,4 @@ for (const role of ["minimum", "latest"]) {
   }
 }
 const versions = [...new Set([pins.minimum.version, pins.latest.version])];
-console.log(`matrix=${JSON.stringify(versions)}`);
+console.log(`versions=${JSON.stringify(versions)}`);
