@@ -9,6 +9,7 @@ const execFileAsync = promisify(execFile);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outputDirectory = path.join(root, "artifacts", "release");
 const manifest = JSON.parse(await readFile(path.join(root, "apps", "vscode", "package.json"), "utf8"));
+const project = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
 async function command(commandName, args) {
   const result = await execFileAsync(commandName, args, { cwd: root, maxBuffer: 20 * 1024 * 1024 });
   return result.stdout.trim();
@@ -25,6 +26,9 @@ async function npmCommand(args) {
 
 await mkdir(outputDirectory, { recursive: true });
 const sbom = JSON.parse(await npmCommand(["sbom", "--sbom-format", "cyclonedx", "--sbom-type", "application", "--package-lock-only"]));
+if (!sbom.metadata?.component) throw new Error("CycloneDX SBOM is missing its root project component.");
+sbom.metadata.component.name = project.name;
+sbom.metadata.component.version = manifest.version;
 const commit = await command("git", ["rev-parse", "HEAD"]);
 const commitTimestamp = await command("git", ["show", "-s", "--format=%cI", "HEAD"]);
 const sourceDateEpoch = await command("git", ["show", "-s", "--format=%ct", "HEAD"]);

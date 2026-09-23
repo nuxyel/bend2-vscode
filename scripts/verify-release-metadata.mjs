@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 const execFileAsync = promisify(execFile);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const manifest = JSON.parse(await readFile(path.join(root, "apps", "vscode", "package.json"), "utf8"));
+const project = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
 const releaseDirectory = path.join(root, "artifacts", "release");
 const prefix = `bend2-vscode-${manifest.version}`;
 const vsixPath = path.join(root, "apps", "vscode", `${prefix}.vsix`);
@@ -32,7 +33,7 @@ if (provenance.artifact.sha256 !== expectedHash) {
 }
 if (provenance.source?.commit !== commit) throw new Error("Release provenance does not describe the current commit.");
 if (provenance.source?.repository !== manifest.repository?.url) throw new Error("Release provenance repository does not match the extension manifest.");
-if (sbom.bomFormat !== "CycloneDX" || sbom.metadata?.component?.name !== manifest.name || sbom.metadata?.component?.version !== manifest.version) {
+if (sbom.bomFormat !== "CycloneDX" || sbom.metadata?.component?.name !== project.name || sbom.metadata?.component?.version !== manifest.version) {
   throw new Error("CycloneDX SBOM metadata does not match the extension manifest.");
 }
 
