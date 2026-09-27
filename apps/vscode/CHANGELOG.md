@@ -3,12 +3,13 @@
 ## Unreleased
 
 - Compiler validation now defaults to save while lightweight parser diagnostics stay active during editing; an explicitly selected validation mode takes precedence over the deprecated compatibility setting.
-- Added Signature Help for local and imported Bend functions, including annotated parameters and nested type delimiters. Its signatures are parser-derived and are not type-inference results.
+- Added parser-backed Signature Help for local and imported Bend functions and laws in desktop, remote and Web editors. Signatures remain provisional until Bend exposes stable semantic data.
 - Documented the 1.0 compiler verification matrix policy and the process requirements for compiler-backed features in VS Code Web.
-- Added a checked-in Bend proof project and pinned, checksum-verified CI runs for its minimum and latest supported compiler versions; desktop integration now opens the project and exercises imported navigation and Signature Help.
+- Added a checked-in Bend proof project and pinned, checksum-verified CI runs for Bend 2.0.28 and 2.0.32; desktop integration opens the project and exercises imported navigation and Signature Help.
+- Require Bend 2.0.28 or newer for supported compiler integration; older versions are reported as unsupported.
 - Cross-file references and rename now verify each candidate through workspace definition resolution, avoiding edits to homonymous declarations in importing files.
 - Compiler validation now uses Bend's `--check-only` mode so checking a file never executes its `main`; older launchers receive a compatibility fallback only for files without a runnable `main`.
-- Recorded the Bend 2.0.23 compiler revision used to capture the human-readable diagnostic fixture.
+- Retained the Bend 2.0.23 diagnostic capture as a legacy compatibility fixture; current compiler support begins at Bend 2.0.28.
 - Surface successful compiler checks that still rely on unsafe or foreign definitions as warnings.
 - Navigate safety warnings to the matching local definition when the compiler report includes its name.
 - Deduplicate Test Explorer runs when a proof suite and one of its law cases are selected together.

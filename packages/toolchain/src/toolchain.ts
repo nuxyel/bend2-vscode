@@ -195,7 +195,13 @@ function revisionOf(output: string): string | undefined {
 
 export function compilerCompatibility(version: string | null): CompilerCompatibility {
   if (!version) return "unknown";
-  return version.startsWith("2.") ? "supported" : "unsupported";
+  const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(version);
+  if (!match) return "unsupported";
+  const major = Number(match[1]);
+  const minor = Number(match[2]);
+  const patch = Number(match[3]);
+  if (major !== 2) return "unsupported";
+  return minor > 0 || patch >= 28 ? "supported" : "unsupported";
 }
 
 export function parseCompilerCapabilities(output: string, source: "guide" | "help"): CompilerCapabilities {

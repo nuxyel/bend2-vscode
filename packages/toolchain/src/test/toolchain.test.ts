@@ -79,7 +79,7 @@ test("classifies proof-related text diagnostics without losing source locations"
   ]);
 });
 
-test("parses the current Bend CLI Error and Location report", async () => {
+test("parses the captured Bend 2.0.23 legacy Error and Location report", async () => {
   const fixtureRoot = path.join(process.cwd(), "src", "test", "fixtures");
   const output = await readFile(path.join(fixtureRoot, "compiler-diagnostics.bend-error"), "utf8");
   const metadata = JSON.parse(await readFile(path.join(fixtureRoot, "compiler-diagnostics.bend-error.meta.json"), "utf8")) as { version: string; revision: string; command: string[] };
@@ -306,7 +306,9 @@ test("rejects differential inputs that are missing or not Bend files", async () 
 });
 
 test("marks Bend 2 versions and unknown versions explicitly", () => {
-  assert.equal(compilerCompatibility("2.0.21"), "supported");
+  assert.equal(compilerCompatibility("2.0.27"), "unsupported");
+  assert.equal(compilerCompatibility("2.0.28"), "supported");
+  assert.equal(compilerCompatibility("2.1.0"), "supported");
   assert.equal(compilerCompatibility("3.0.0"), "unsupported");
   assert.equal(compilerCompatibility(null), "unknown");
 });
@@ -326,8 +328,8 @@ test("uses the documented Bend 2 version, guide and file-check commands", async 
         "@echo off",
         ">>\"%~dp0calls.log\" echo %*",
         "if \"%~1\"==\"bend\" shift",
-        "if \"%~1\"==\"--version\" (echo bend 2.0.16& exit /b 0)",
-        "if \"%~1\"==\"version\" (echo bend 2.0.16& exit /b 0)",
+        "if \"%~1\"==\"--version\" (echo bend 2.0.28& exit /b 0)",
+        "if \"%~1\"==\"version\" (echo bend 2.0.28& exit /b 0)",
         "if \"%~1\"==\"guide\" (echo JavaScript target native executable --threads --gpu& exit /b 0)",
         "if \"%~1\"==\"--help\" (echo Bend help& exit /b 0)",
         "echo %~1:2:3: error: type mismatch 1>&2",
@@ -341,7 +343,7 @@ test("uses the documented Bend 2 version, guide and file-check commands", async 
         "printf '%s\\n' \"$*\" >> \"$(dirname \"$0\")/calls.log\"",
         "if [ \"${1:-}\" = bend ]; then shift; fi",
         "case \"$1\" in",
-        "  --version|version) echo 'bend 2.0.16' ;;",
+        "  --version|version) echo 'bend 2.0.28' ;;",
         "  guide) echo 'JavaScript target native executable --threads --gpu' ;;",
         "  --help) echo 'Bend help' ;;",
         "  *) echo \"$1:2:3: error: type mismatch\" >&2; exit 1 ;;",
@@ -354,7 +356,7 @@ test("uses the documented Bend 2 version, guide and file-check commands", async 
     await writeFile(file, "def main():\n  0\n");
     const adapter = new BendToolchain({ workspaceRoot: root, executablePath: compiler, executableArgs: ["bend"] });
     const info = await adapter.discover();
-    assert.equal(info.version, "2.0.16");
+    assert.equal(info.version, "2.0.28");
     assert.equal(info.compatibility, "supported");
     const result = await adapter.check(file);
     assert.equal(result.code, 1);
@@ -378,14 +380,14 @@ test("keeps configured launcher arguments before Bend commands", async () => {
     const script = [
       "const args = process.argv.slice(1);",
       "const command = args.at(-1);",
-      "if (command === '--version' || command === 'version') console.log('bend 2.0.16');",
+      "if (command === '--version' || command === 'version') console.log('bend 2.0.28');",
       "else if (command === 'guide') console.log('JavaScript target native executable --threads');",
       "else console.log('ok');",
     ].join(" ");
     const adapter = new BendToolchain({ workspaceRoot: root, executablePath: process.execPath, executableArgs: ["--no-warnings", "-e", script, "--"] });
     const info = await adapter.discover();
     assert.equal(info.source, "configured");
-    assert.equal(info.version, "2.0.16");
+    assert.equal(info.version, "2.0.28");
     assert.deepEqual(info.argsPrefix, ["--no-warnings", "-e", script, "--"]);
   } finally {
     await rm(root, { recursive: true, force: true });
@@ -398,7 +400,7 @@ test("preserves launcher prefixes for WSL, SSH, Dev Container and Codespaces fix
   const script = [
     "const args = process.argv.slice(1);",
     "const command = args.at(-1);",
-    "if (command === '--version' || command === 'version') console.log('bend 2.0.16');",
+    "if (command === '--version' || command === 'version') console.log('bend 2.0.28');",
     "else if (command === 'guide') console.log('JavaScript target native executable --threads');",
     "else console.log('ok');",
   ].join(" ");
@@ -413,7 +415,7 @@ test("preserves launcher prefixes for WSL, SSH, Dev Container and Codespaces fix
       });
       const info = await adapter.discover();
       assert.equal(info.source, "configured", fixture.name);
-      assert.equal(info.version, "2.0.16", fixture.name);
+      assert.equal(info.version, "2.0.28", fixture.name);
       assert.deepEqual(info.argsPrefix.slice(-fixture.arguments.length), fixture.arguments, fixture.name);
     } finally {
       await rm(root, { recursive: true, force: true });
@@ -427,7 +429,7 @@ test("falls back when an older Bend launcher rejects check-only", async () => {
     const script = [
       "const args = process.argv.slice(1);",
       "const command = args.at(-1);",
-      "if (command === '--version' || command === 'version') console.log('bend 2.0.16');",
+      "if (command === '--version' || command === 'version') console.log('bend 2.0.28');",
       "else if (command === 'guide') console.log('JavaScript target native executable --threads');",
       "else if (args.includes('--check-only')) { console.error('unknown option --check-only'); process.exitCode = 2; }",
       "else { console.error('main.bend:2:3: error: legacy check'); process.exitCode = 1; }",
@@ -449,7 +451,7 @@ test("refuses to execute main when a legacy launcher lacks check-only", async ()
     const script = [
       "const args = process.argv.slice(1);",
       "const command = args.at(-1);",
-      "if (command === '--version' || command === 'version') console.log('bend 2.0.16');",
+    "if (command === '--version' || command === 'version') console.log('bend 2.0.28');",
       "else if (command === 'guide') console.log('JavaScript target native executable --threads');",
       "else if (args.includes('--check-only')) { console.error('unknown option --check-only'); process.exitCode = 2; }",
       "else { console.log('main executed'); }",
