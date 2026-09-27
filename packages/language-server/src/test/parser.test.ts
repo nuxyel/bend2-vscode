@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { parallelBalanceDiagnostic, parseBend, wordAt } from "../parser.js";
+import { callContextAt, parseSignature } from "../signature.js";
 
 const fixtures = path.basename(process.cwd()) === "language-server"
   ? path.join(process.cwd(), "src", "test", "fixtures")
@@ -27,6 +28,39 @@ test("reports duplicate declarations", () => {
 test("finds a word at a source position", () => {
   assert.equal(wordAt("def hello():", { line: 0, character: 6 }), "hello");
   assert.equal(wordAt("def hello():", { line: 0, character: 0 }), "def");
+});
+
+test("finds the active call and argument across nested expressions", () => {
+  const source = "def main():\n  calculate(first(1, 2), \n    nested(value, more))\n";
+  const call = callContextAt(source, { line: 2, character: 18 });
+  assert.deepEqual(call, {
+    name: "nested",
+    nameStart: { line: 2, character: 4 },
+    activeParameter: 1,
+  });
+  assert.equal(callContextAt('def main():\n  "fake(1, 2)"\n', { line: 1, character: 13 }), undefined);
+  assert.equal(callContextAt("def main():\n  # fake(1, 2)\n", { line: 1, character: 15 }), undefined);
+  assert.deepEqual(callContextAt("def main():\r\n  combine(one, ", { line: 1, character: 18 }), {
+    name: "combine",
+    nameStart: { line: 1, character: 2 },
+    activeParameter: 1,
+  });
+});
+
+test("parses Bend function and law signatures with typed and nested parameters", () => {
+  assert.deepEqual(parseSignature("combine", "def combine(left: Nat, pair: Pair(Nat, Nat)):"), {
+    label: "combine(left: Nat, pair: Pair(Nat, Nat))",
+    parameters: ["left: Nat", "pair: Pair(Nat, Nat)"],
+  });
+  assert.deepEqual(parseSignature("Laws.valid", "law Laws.valid(value: Nat):"), {
+    label: "Laws.valid(value: Nat)",
+    parameters: ["value: Nat"],
+  });
+  assert.deepEqual(parseSignature("incomplete", "def incomplete(first: Nat, second:"), {
+    label: "incomplete(first: Nat, second:",
+    parameters: ["first: Nat", "second:"],
+  });
+  assert.equal(parseSignature("zero", "def zero:"), undefined);
 });
 
 test("understands qualified proof definitions and Bend 2 type declarations", () => {

@@ -21,10 +21,10 @@ import {
   ProposedFeatures,
   SemanticTokensParams,
   SemanticTokensRangeParams,
-  SymbolKind,
-  SymbolInformation,
   SignatureHelp,
   SignatureInformation,
+  SymbolKind,
+  SymbolInformation,
   ParameterInformation,
   TextDocuments,
   TextDocumentSyncKind,
@@ -48,8 +48,8 @@ import { BendWorkspaceIndex } from "./semanticIndex.js";
 import { platformMismatchMessage } from "./environment.js";
 import { semanticTokens, tokenModifiers, tokenTypes } from "./semanticTokens.js";
 import { CheckScheduler } from "./checkScheduler.js";
-import { callContextAt, parseBendSignature } from "./signatureHelp.js";
 import { resolveValidationMode, ValidationMode } from "./validationMode.js";
+import { callContextAt, parseSignature } from "./signature.js";
 
 const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments(TextDocument);
@@ -347,13 +347,8 @@ connection.onSignatureHelp(async (params): Promise<SignatureHelp | null> => {
   const document = documents.get(params.textDocument.uri);
   if (!document || !index) return null;
   const source = document.getText();
-  const offset = document.offsetAt(params.position);
-  const context = callContextAt(source, offset);
+  const context = callContextAt(source, params.position);
   if (!context) return null;
-  const callNameStart = source.slice(0, offset).lastIndexOf(context.name);
-  const before = source.slice(0, callNameStart);
-  const line = before.split(/\r?\n/).length - 1;
-  const character = (before.split(/\r?\n/).at(-1) ?? "").length;
   let target;
   if (context.name.includes(".")) {
     const [alias, ...memberParts] = context.name.split(".");
@@ -364,18 +359,18 @@ connection.onSignatureHelp(async (params): Promise<SignatureHelp | null> => {
     const importedSymbol = importedDocument?.parsed.symbols.find((symbol) => symbol.name === memberName || symbol.name.split(".").at(-1) === memberName);
     if (importedDocument && importedSymbol) target = { uri: importedDocument.uri, symbol: { ...importedSymbol, uri: importedDocument.uri, provenance: importedDocument.provenance } };
   }
-  target ??= await index.definition(document.uri, { line, character });
+  target ??= await index.definition(document.uri, context.nameStart);
   if (!target || !["function", "law"].includes(target.symbol.kind)) return null;
   const targetDocument = index.get(target.uri);
   if (!targetDocument) return null;
-  const signature = parseBendSignature(targetDocument.source, target.symbol.name.split(".").at(-1) ?? target.symbol.name);
+  const declaration = targetDocument.source.split(/\r?\n/)[target.symbol.range.start.line];
+  const signature = declaration && parseSignature(target.symbol.name, declaration);
   if (!signature) return null;
-  const parameters = signature.parameters.map((parameter) => ParameterInformation.create(parameter.label));
-  const activeParameter = Math.min(context.activeParameter, Math.max(0, parameters.length - 1));
+  const parameters = signature.parameters.map((parameter) => ParameterInformation.create(parameter));
   return {
     signatures: [SignatureInformation.create(signature.label, undefined, ...parameters)],
     activeSignature: 0,
-    activeParameter,
+    activeParameter: signature.parameters.length === 0 ? 0 : Math.min(context.activeParameter, signature.parameters.length - 1),
   };
 });
 

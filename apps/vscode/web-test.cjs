@@ -14,7 +14,7 @@ async function run() {
 
   const document = await vscode.workspace.openTextDocument({
     language: "bend",
-    content: "def main():\n  ?TODO\n",
+    content: "def main():\n  ?TODO\ndef local(a: Nat, b: Nat):\n  local(1, )\n",
   });
   await vscode.window.showTextDocument(document);
 
@@ -40,6 +40,14 @@ async function run() {
   assert(Array.isArray(hovers) && hovers.length > 0, "The web hover provider did not return local symbol information.");
   const hoverText = hovers.flatMap((hover) => hover.contents ?? []).map((content) => typeof content === "string" ? content : content.value ?? String(content)).join("\n");
   assert(/def main\(\)/.test(hoverText), `The web hover did not include the complete declaration: ${hoverText}`);
+  const localSignature = await vscode.commands.executeCommand(
+    "vscode.executeSignatureHelpProvider",
+    document.uri,
+    new vscode.Position(3, 10),
+    ",",
+  );
+  assert(localSignature?.activeParameter === 1, "The web signature provider did not select the active local argument.");
+  assert(/local\(a: Nat, b: Nat\)/.test(localSignature?.signatures?.[0]?.label ?? ""), "The web signature provider did not return the local signature.");
   const localReferences = await vscode.commands.executeCommand(
     "vscode.executeReferenceProvider",
     document.uri,
@@ -55,8 +63,8 @@ async function run() {
   const libraryUri = vscode.Uri.joinPath(fixtureRoot, "library.bend");
   const consumerUri = vscode.Uri.joinPath(fixtureRoot, "consumer.bend");
   await vscode.workspace.fs.createDirectory(fixtureRoot);
-  await vscode.workspace.fs.writeFile(libraryUri, new TextEncoder().encode("type Option:\n  Some { value }\ndef helper(value: Nat):\n  value\n"));
-  await vscode.workspace.fs.writeFile(consumerUri, new TextEncoder().encode("import ./library.bend as Library\ndef consumer(x: Option):\n  helper\n"));
+  await vscode.workspace.fs.writeFile(libraryUri, new TextEncoder().encode("type Option:\n  Some { value }\ndef helper(value: Nat, other: Nat):\n  value\n"));
+  await vscode.workspace.fs.writeFile(consumerUri, new TextEncoder().encode("import ./library.bend as Library\ndef consumer(x: Option):\n  helper(x, )\n"));
   await new Promise((resolve) => setTimeout(resolve, 500));
   await vscode.languages.setTextDocumentLanguage(await vscode.workspace.openTextDocument(libraryUri), "bend");
   const consumer = await vscode.workspace.openTextDocument(consumerUri);
@@ -89,7 +97,15 @@ async function run() {
   );
   assert(Array.isArray(workspaceHovers) && workspaceHovers.length > 0, "The web hover provider did not return the cross-file symbol.");
   const workspaceHoverText = workspaceHovers.flatMap((hover) => hover.contents ?? []).map((content) => typeof content === "string" ? content : content.value ?? String(content)).join("\n");
-  assert(/helper\(value: Nat\)/.test(workspaceHoverText), `The web cross-file hover did not include the declaration: ${workspaceHoverText}`);
+  assert(/helper\(value: Nat, other: Nat\)/.test(workspaceHoverText), `The web cross-file hover did not include the declaration: ${workspaceHoverText}`);
+  const workspaceSignature = await vscode.commands.executeCommand(
+    "vscode.executeSignatureHelpProvider",
+    consumer.uri,
+    new vscode.Position(2, 11),
+    ",",
+  );
+  assert(workspaceSignature?.activeParameter === 1, "The web signature provider did not select the active workspace argument.");
+  assert(/helper\(value: Nat, other: Nat\)/.test(workspaceSignature?.signatures?.[0]?.label ?? ""), "The web signature provider did not return the indexed declaration.");
 
   const references = await vscode.commands.executeCommand(
     "vscode.executeReferenceProvider",

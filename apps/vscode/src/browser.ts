@@ -153,6 +153,28 @@ export function activate(context: vscode.ExtensionContext): void {
       return [...items.values()];
     },
   }, ".", ":"));
+  context.subscriptions.push(vscode.languages.registerSignatureHelpProvider("bend", {
+    async provideSignatureHelp(document, position) {
+      const { callContextAt, parseSignature } = await import("@bend2/language-server/dist/signature.js");
+      const call = callContextAt(document.getText(), position);
+      if (!call) return undefined;
+      const local = browserSymbols(document).find((symbol) => symbol.name === call.name || symbol.name.split(".").pop() === call.name.split(".").pop());
+      const symbol = local ?? await index.findSymbol(call.name);
+      if (!symbol) return undefined;
+      const declaration = (symbol as BrowserDocumentSymbol).bendDeclaration
+        ?? (symbol.range.start.line < document.lineCount ? document.lineAt(symbol.range.start.line).text : undefined);
+      if (!declaration) return undefined;
+      const parsed = parseSignature(symbol.name, declaration);
+      if (!parsed) return undefined;
+      const signature = new vscode.SignatureInformation(parsed.label);
+      signature.parameters = parsed.parameters.map((label) => new vscode.ParameterInformation(label));
+      const help = new vscode.SignatureHelp();
+      help.signatures = [signature];
+      help.activeSignature = 0;
+      help.activeParameter = parsed.parameters.length === 0 ? 0 : Math.min(call.activeParameter, parsed.parameters.length - 1);
+      return help;
+    },
+  }, { triggerCharacters: ["(", ","], retriggerCharacters: [","] }));
   context.subscriptions.push(vscode.languages.registerHoverProvider("bend", {
     async provideHover(document, position) {
       const name = wordAt(document, position);

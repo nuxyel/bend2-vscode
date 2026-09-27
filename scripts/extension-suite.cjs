@@ -148,7 +148,7 @@ suite("Bend 2 extension", () => {
   test("serves references, rename and type definition through the LSP", async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "bend2-vscode-navigation-"));
     const file = path.join(root, "navigation.bend");
-    await fs.writeFile(file, "type Option:\n  Some { value }\ndef helper(value: Nat):\n  value\ndef main(x: Option):\n  helper(0)\n");
+    await fs.writeFile(file, "type Option:\n  Some { value }\ndef helper(value: Nat, other: Nat):\n  value\ndef main(x: Option):\n  helper(0, 1)\n");
     try {
       const document = await vscode.workspace.openTextDocument(vscode.Uri.file(file));
       await vscode.window.showTextDocument(document);
@@ -184,7 +184,16 @@ suite("Bend 2 extension", () => {
       const hovers = await vscode.commands.executeCommand("vscode.executeHoverProvider", document.uri, helperCall);
       assert.ok(Array.isArray(hovers) && hovers.length > 0, "The language server did not return hover information.");
       const hoverText = hovers.flatMap((hover) => hover.contents ?? []).map((content) => typeof content === "string" ? content : content.value ?? String(content)).join("\n");
-      assert.match(hoverText, /helper\(value: Nat\)/, `The hover did not include the complete Bend declaration: ${hoverText}`);
+      assert.match(hoverText, /helper\(value: Nat, other: Nat\)/, `The hover did not include the complete Bend declaration: ${hoverText}`);
+
+      const signature = await vscode.commands.executeCommand(
+        "vscode.executeSignatureHelpProvider",
+        document.uri,
+        new vscode.Position(5, 11),
+        ",",
+      );
+      assert.equal(signature?.activeParameter, 1, "The language server did not select the active helper argument.");
+      assert.match(signature?.signatures?.[0]?.label ?? "", /helper\(value: Nat, other: Nat\)/, "The language server did not return the helper signature.");
 
       const edits = await vscode.commands.executeCommand(
         "vscode.executeFormatDocumentProvider",
