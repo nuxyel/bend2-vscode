@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
@@ -32,10 +32,15 @@ sbom.metadata.component.version = manifest.version;
 const commit = await command("git", ["rev-parse", "HEAD"]);
 const commitTimestamp = await command("git", ["show", "-s", "--format=%cI", "HEAD"]);
 const sourceDateEpoch = await command("git", ["show", "-s", "--format=%ct", "HEAD"]);
-const vsixName = (await readdir(path.join(root, "apps", "vscode"))).find((name) => name.endsWith(".vsix"));
-if (!vsixName) throw new Error("No VSIX found. Run npm run package first.");
+const vsixName = `${manifest.name}-${manifest.version}.vsix`;
 const vsixPath = path.join(root, "apps", "vscode", vsixName);
-const vsixHash = createHash("sha256").update(await readFile(vsixPath)).digest("hex");
+let vsixBytes;
+try {
+  vsixBytes = await readFile(vsixPath);
+} catch {
+  throw new Error(`VSIX ${vsixName} not found. Run npm run package first.`);
+}
+const vsixHash = createHash("sha256").update(vsixBytes).digest("hex");
 const provenance = {
   schemaVersion: 1,
   artifact: { name: vsixName, version: manifest.version, sha256: vsixHash },
