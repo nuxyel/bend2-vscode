@@ -13,7 +13,7 @@ Both secrets are optional at workflow level. The corresponding marketplace step 
 
 1. Update `apps/vscode/package.json` and `apps/vscode/CHANGELOG.md`.
 2. Run `npm run check`, `npm run test:dogfood` against both pinned compiler versions, desktop integration, Web integration, packaging and release-metadata verification. The CI dogfood job installs checksum-verified compiler releases and runs desktop integration with the checked-in proof project as the workspace.
-3. Create an annotated tag matching the extension version, for example `v0.1.0`.
+3. Create an annotated tag matching the extension version, for example `v1.0.0`.
 4. Push the tag, or select that exact tag when using `workflow_dispatch`. Both paths require a tag ref whose version matches `apps/vscode/package.json`; dispatching from a branch cannot publish.
 5. GitHub Actions runs the build/check suite, Bend compiler dogfood matrix, Stable desktop and Web smoke tests, then builds the VSIX, verifies its contents, creates the CycloneDX SBOM and provenance record, and publishes to any marketplace whose secret is configured.
 

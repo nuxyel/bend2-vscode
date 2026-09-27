@@ -259,7 +259,7 @@ connection.onInitialize((params: InitializeParams) => {
       semanticTokensProvider: { legend: { tokenTypes, tokenModifiers }, range: true, full: true },
       documentFormattingProvider: true,
     },
-    serverInfo: { name: "Bend 2 Language Server", version: "0.1.0" },
+    serverInfo: { name: "Bend 2 Language Server", version: "1.0.0" },
   };
 });
 

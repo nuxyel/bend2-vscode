@@ -1,6 +1,6 @@
 {
   "name": "@bend2/toolchain",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Safe Bend 2 compiler discovery and process integration.",
   "license": "Apache-2.0",

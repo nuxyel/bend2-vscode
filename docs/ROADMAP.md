@@ -2,13 +2,13 @@
 
 This roadmap describes broad release goals. It does not promise dates. Release notes describe what is available today.
 
-## 0.1 — Preview
+## 0.1 — Preview (released)
 
-Publish the current feature set for early use and feedback. Some language intelligence and proof details are provisional because they use a tolerant source parser where Bend does not expose stable semantic data.
+Published the initial feature set for early use and feedback. Some language intelligence and proof details are provisional because they use a tolerant source parser where Bend does not expose stable semantic data.
 
-## 1.0 — Reliable core
+## 1.0 — Reliable core (first stable release)
 
-Make the everyday editing loop dependable: syntax and formatting, compiler diagnostics with compatibility fallback, check/build/run commands, completion and navigation, signature help, and basic proof workflows. Document supported Bend and VS Code environments and validate each supported mode before release.
+Provide a dependable everyday editing loop: syntax and formatting, compiler diagnostics with compatibility fallback, check/build/run commands, completion and navigation, Signature Help, and basic proof workflows. Document supported Bend and VS Code environments and validate each supported mode before release.
 
 ## 1.x — Bend-aware intelligence
 

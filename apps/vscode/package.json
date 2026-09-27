@@ -2,7 +2,7 @@
   "name": "bend2-vscode",
   "displayName": "%extension.displayName%",
   "description": "%extension.description%",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "publisher": "nuxyel",
   "license": "Apache-2.0",
   "repository": {
@@ -169,8 +169,8 @@
     "package": "node ../../scripts/package-vsix.mjs"
   },
   "dependencies": {
-    "@bend2/language-server": "0.1.0",
-    "@bend2/toolchain": "0.1.0",
+    "@bend2/language-server": "1.0.0",
+    "@bend2/toolchain": "1.0.0",
     "vscode-languageclient": "^10.1.0"
   },
   "devDependencies": {

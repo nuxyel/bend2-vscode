@@ -1,6 +1,6 @@
 {
   "name": "@bend2/language-server",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Reusable Language Server Protocol support for Bend 2.",
   "license": "Apache-2.0",

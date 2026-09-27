@@ -4,15 +4,16 @@ Language support and development tools for [Bend 2](https://github.com/HigherOrd
 The extension includes syntax highlighting, formatting, compiler checks, execution commands,
 workspace navigation, and a proof explorer.
 
-The project is in preview. Some editor intelligence and proof details are inferred from source
-text until Bend provides stable semantic and diagnostic interfaces. Compiler-backed features
-require Bend 2 to be installed in the VS Code workspace environment.
+The first stable release provides a dependable editing loop for Bend 2. Some editor intelligence
+and proof details are inferred from source text until Bend provides stable semantic and diagnostic
+interfaces. Compiler-backed features require Bend 2 to be installed in the VS Code workspace
+environment.
 
 ## Features
 
 - Bend 2 syntax highlighting, snippets, and formatting.
 - Compiler diagnostics and commands to check, build, and run Bend files.
-- Completion, hover, symbols, and navigation across local Bend files.
+- Completion, hover, Signature Help, symbols, and navigation across local Bend files.
 - Proof Explorer for laws and proof files, with checker status when available.
 - JavaScript, native CPU, and GPU execution profiles where supported by the compiler.
 - Desktop, remote workspace, and browser-safe editor support with capability differences shown in the UI.

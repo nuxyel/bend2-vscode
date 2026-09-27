@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.0.0 — 2026-09-27
 
 - Compiler validation now defaults to save while lightweight parser diagnostics stay active during editing; an explicitly selected validation mode takes precedence over the deprecated compatibility setting.
 - Added parser-backed Signature Help for local and imported Bend functions and laws in desktop, remote and Web editors. Signatures remain provisional until Bend exposes stable semantic data.
