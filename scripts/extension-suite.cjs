@@ -215,29 +215,33 @@ suite("Bend 2 extension", () => {
     }
   });
 
-  test("provides local and imported function signatures with active parameters", async function () {
+  test("provides local, imported and law signatures with active parameters", async function () {
     this.timeout(10000);
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "bend2-vscode-signature-"));
     const library = path.join(root, "lib.bend");
     const main = path.join(root, "main.bend");
     await fs.writeFile(library, "def imported(first: Nat, second: List(Nat)):\n  first\n");
-    await fs.writeFile(main, "import ./lib.bend as Lib\ndef local(a: Nat, b: Option((Nat, Nat))):\n  a\ndef main():\n  local(0, )\n  Lib.imported(0, )\n");
+    await fs.writeFile(main, "import ./lib.bend as Lib\ndef local(a: Nat, b: Option((Nat, Nat))):\n  a\nlaw localLaw(first: Nat, second: Nat):\n  first\ndef main():\n  local(0, )\n  Lib.imported(0, )\n  localLaw(0, )\n");
     try {
       const document = await vscode.workspace.openTextDocument(vscode.Uri.file(main));
       await vscode.window.showTextDocument(document);
       const deadline = Date.now() + 5000;
       let localHelp;
       let importedHelp;
+      let lawHelp;
       do {
-        localHelp = await vscode.commands.executeCommand("vscode.executeSignatureHelpProvider", document.uri, new vscode.Position(4, 11), ",");
-        importedHelp = await vscode.commands.executeCommand("vscode.executeSignatureHelpProvider", document.uri, new vscode.Position(5, 18), ",");
-        if (localHelp?.signatures?.length && importedHelp?.signatures?.length) break;
+        localHelp = await vscode.commands.executeCommand("vscode.executeSignatureHelpProvider", document.uri, new vscode.Position(6, 11), ",");
+        importedHelp = await vscode.commands.executeCommand("vscode.executeSignatureHelpProvider", document.uri, new vscode.Position(7, 18), ",");
+        lawHelp = await vscode.commands.executeCommand("vscode.executeSignatureHelpProvider", document.uri, new vscode.Position(8, 14), ",");
+        if (localHelp?.signatures?.length && importedHelp?.signatures?.length && lawHelp?.signatures?.length) break;
         await new Promise((resolve) => setTimeout(resolve, 100));
       } while (Date.now() < deadline);
       assert.match(localHelp?.signatures?.[0]?.label ?? "", /local\(a: Nat, b: Option\(\(Nat, Nat\)\)\)/);
       assert.equal(localHelp?.activeParameter, 1);
       assert.match(importedHelp?.signatures?.[0]?.label ?? "", /imported\(first: Nat, second: List\(Nat\)\)/);
       assert.equal(importedHelp?.activeParameter, 1);
+      assert.match(lawHelp?.signatures?.[0]?.label ?? "", /localLaw\(first: Nat, second: Nat\)/);
+      assert.equal(lawHelp?.activeParameter, 1);
     } finally {
       await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
       for (let attempt = 0; attempt < 5; attempt += 1) {

@@ -14,7 +14,7 @@ async function run() {
 
   const document = await vscode.workspace.openTextDocument({
     language: "bend",
-    content: "def main():\n  ?TODO\ndef local(a: Nat, b: Nat):\n  local(1, )\n",
+    content: "def main():\n  ?TODO\n  local(1, )\n  localLaw(1, )\ndef local(a: Nat, b: Nat):\n  local(a, b)\nlaw localLaw(a: Nat, b: Nat):\n  a\n",
   });
   await vscode.window.showTextDocument(document);
 
@@ -43,11 +43,19 @@ async function run() {
   const localSignature = await vscode.commands.executeCommand(
     "vscode.executeSignatureHelpProvider",
     document.uri,
-    new vscode.Position(3, 10),
+    new vscode.Position(2, 10),
     ",",
   );
   assert(localSignature?.activeParameter === 1, "The web signature provider did not select the active local argument.");
   assert(/local\(a: Nat, b: Nat\)/.test(localSignature?.signatures?.[0]?.label ?? ""), "The web signature provider did not return the local signature.");
+  const localLawSignature = await vscode.commands.executeCommand(
+    "vscode.executeSignatureHelpProvider",
+    document.uri,
+    new vscode.Position(3, 14),
+    ",",
+  );
+  assert(localLawSignature?.activeParameter === 1, "The web signature provider did not select the active local law argument.");
+  assert(/localLaw\(a: Nat, b: Nat\)/.test(localLawSignature?.signatures?.[0]?.label ?? ""), "The web signature provider did not return the local law signature.");
   const localReferences = await vscode.commands.executeCommand(
     "vscode.executeReferenceProvider",
     document.uri,
@@ -64,7 +72,7 @@ async function run() {
   const consumerUri = vscode.Uri.joinPath(fixtureRoot, "consumer.bend");
   await vscode.workspace.fs.createDirectory(fixtureRoot);
   await vscode.workspace.fs.writeFile(libraryUri, new TextEncoder().encode("type Option:\n  Some { value }\ndef helper(value: Nat, other: Nat):\n  value\n"));
-  await vscode.workspace.fs.writeFile(consumerUri, new TextEncoder().encode("import ./library.bend as Library\ndef consumer(x: Option):\n  helper(x, )\n"));
+  await vscode.workspace.fs.writeFile(consumerUri, new TextEncoder().encode("import ./library.bend as Library\ndef consumer(x: Option):\n  helper(x, )\n  Library.helper(x, )\n"));
   await new Promise((resolve) => setTimeout(resolve, 500));
   await vscode.languages.setTextDocumentLanguage(await vscode.workspace.openTextDocument(libraryUri), "bend");
   const consumer = await vscode.workspace.openTextDocument(consumerUri);
@@ -106,6 +114,14 @@ async function run() {
   );
   assert(workspaceSignature?.activeParameter === 1, "The web signature provider did not select the active workspace argument.");
   assert(/helper\(value: Nat, other: Nat\)/.test(workspaceSignature?.signatures?.[0]?.label ?? ""), "The web signature provider did not return the indexed declaration.");
+  const qualifiedWorkspaceSignature = await vscode.commands.executeCommand(
+    "vscode.executeSignatureHelpProvider",
+    consumer.uri,
+    new vscode.Position(3, 19),
+    ",",
+  );
+  assert(qualifiedWorkspaceSignature?.activeParameter === 1, "The web signature provider did not select the active qualified workspace argument.");
+  assert(/helper\(value: Nat, other: Nat\)/.test(qualifiedWorkspaceSignature?.signatures?.[0]?.label ?? ""), "The web signature provider did not resolve a qualified workspace signature.");
 
   const references = await vscode.commands.executeCommand(
     "vscode.executeReferenceProvider",
