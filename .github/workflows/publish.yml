@@ -16,6 +16,8 @@ jobs:
     needs: dogfood
     runs-on: ubuntu-24.04
     timeout-minutes: 25
+    permissions:
+      contents: write
     env:
       VSCE_PAT: ${{ secrets.VSCE_PAT }}
       OVSX_PAT: ${{ secrets.OVSX_PAT }}
@@ -46,6 +48,17 @@ jobs:
             ${{ env.VSIX_PATH }}
             artifacts/release/
           if-no-files-found: error
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="$(node -p "require('./apps/vscode/package.json').version")"
+          gh release create "$GITHUB_REF_NAME" \
+            "$VSIX_PATH" \
+            "artifacts/release/bend2-vscode-${VERSION}.cdx.json" \
+            "artifacts/release/bend2-vscode-${VERSION}.provenance.json" \
+            --title "Bend 2 for VS Code ${VERSION}" \
+            --generate-notes
       - name: Publish to VS Code Marketplace
         if: env.VSCE_PAT != ''
         run: npx --yes @vscode/vsce publish --packagePath "$VSIX_PATH" --pat "$VSCE_PAT"
