@@ -36,7 +36,9 @@ jobs:
       - run: npm run release:metadata
       - run: npm run verify-release-metadata
       - name: Resolve VSIX path
-        run: echo "VSIX_PATH=apps/vscode/bend2-vscode-$(node -p \"require('./apps/vscode/package.json').version\").vsix" >> "$GITHUB_ENV"
+        run: |
+          VERSION="$(node -p "require('./apps/vscode/package.json').version")"
+          echo "VSIX_PATH=apps/vscode/bend2-vscode-${VERSION}.vsix" >> "$GITHUB_ENV"
       - name: Verify tag matches extension version
         run: |
           test "$GITHUB_REF_TYPE" = "tag"
