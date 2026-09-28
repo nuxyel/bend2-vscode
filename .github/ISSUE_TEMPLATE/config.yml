@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Support policy and compatibility
+    url: https://github.com/nuxyel/bend2-vscode/blob/main/docs/SUPPORT.md
+    about: Check supported Bend, VS Code, and host versions before reporting a compatibility issue.
+  - name: Bend compiler issues
+    url: https://github.com/HigherOrderCO/Bend/issues
+    about: Report compiler behavior or language bugs to the Bend project.

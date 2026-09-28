@@ -1,0 +1,63 @@
+name: Bug report
+description: Report a problem with the Bend 2 VS Code extension.
+title: "Bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Please check the [support policy](https://github.com/nuxyel/bend2-vscode/blob/main/docs/SUPPORT.md).
+        Do not include private source code or secrets in your report.
+  - type: input
+    id: extension-version
+    attributes:
+      label: Extension version
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: input
+    id: bend-version
+    attributes:
+      label: Bend version
+      description: "Use Bend 2: Show Bend Version, or enter ‘not installed’."
+      placeholder: 2.0.32
+    validations:
+      required: true
+  - type: dropdown
+    id: host
+    attributes:
+      label: VS Code host
+      options:
+        - Desktop
+        - WSL
+        - Remote SSH
+        - Dev Container
+        - VS Code Web
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe what you expected and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open a Bend workspace.
+        2. Run ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Support diagnostics (optional)
+      description: "Use ‘Bend 2: Copy Support Diagnostics’. This report does not include source code."
+      render: text
+    validations:
+      required: false
