@@ -9,6 +9,14 @@ The release workflow is tag-driven and keeps publishing credentials out of the r
 
 Both secrets are optional at workflow level. The corresponding marketplace step is skipped when its token is absent; the VSIX and release metadata are still built and uploaded for inspection.
 
+## Publishing an existing release to the Visual Studio Marketplace
+
+The extension manifest uses publisher ID `nuxyel`; that publisher must exist in the Visual Studio Marketplace and your account must be allowed to publish to it. For the current GitHub Actions workflow, create an Azure DevOps personal access token with **All accessible organizations** and the **Marketplace (Manage)** scope, then save it as the repository Actions secret `VSCE_PAT`. Never commit or paste the token into an issue or chat.
+
+The initial tag run publishes to the Marketplace automatically when `VSCE_PAT` is configured. If the release was created before the secret was added, use **Actions → Publish VS Code Marketplace → Run workflow** and enter its existing tag, such as `v1.0.0`. This dedicated workflow validates and packages the exact tagged source before publishing; it does not recreate the GitHub Release.
+
+Microsoft recommends Microsoft Entra ID workload identity federation for secure automated publishing. Azure DevOps global PATs are scheduled for retirement on December 1, 2026, so migrate the Marketplace credential flow before then. See the [official VS Code publishing guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension).
+
 ## Release process
 
 1. Update `apps/vscode/package.json` and `apps/vscode/CHANGELOG.md`.
