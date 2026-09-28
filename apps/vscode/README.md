@@ -1,6 +1,16 @@
 # Bend 2 for VS Code
 
-Proof-aware language support and developer tools for [Bend 2](https://github.com/bendlang/bend).
+<p align="center">
+  <a href="https://github.com/nuxyel/bend2-vscode/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/nuxyel/bend2-vscode/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <a href="https://github.com/nuxyel/bend2-vscode/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/nuxyel/bend2-vscode?display_name=tag&label=release"></a>
+  <a href="https://github.com/nuxyel/bend2-vscode/blob/main/LICENSE"><img alt="Apache-2.0 license" src="https://img.shields.io/badge/license-Apache--2.0-blue.svg"></a>
+</p>
+
+Proof-aware language support and developer tools for [Bend 2](https://github.com/HigherOrderCO/Bend).
+
+![Bend 2 source open in VS Code, with the project explorer and syntax highlighting](images/bend2-editor.png)
+
+*The editor screenshot uses the repository's own Bend dogfood project.*
 
 ## Features
 
