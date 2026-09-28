@@ -1,5 +1,5 @@
 {
-  "extension.displayName": "Bend 2",
+  "extension.displayName": "Bend 2 Language Support by Nuxyel",
   "extension.description": "Proof-aware language support and developer tools for Bend 2.",
   "command.checkFile": "Bend 2: Check Current File",
   "command.checkWorkspace": "Bend 2: Check Workspace",

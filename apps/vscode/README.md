@@ -1,4 +1,4 @@
-# Bend 2 for VS Code
+# Bend 2 Language Support by Nuxyel
 
 <p align="center">
   <a href="https://github.com/nuxyel/bend2-vscode/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/nuxyel/bend2-vscode/actions/workflows/ci.yml/badge.svg?branch=main"></a>

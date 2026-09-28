@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.0.1 — 2026-09-27
+
+- Give the Marketplace listing a distinct display name after the initial name was rejected as already in use.
+
 ## 1.0.0 — 2026-09-27
 
 - Compiler validation now defaults to save while lightweight parser diagnostics stay active during editing; an explicitly selected validation mode takes precedence over the deprecated compatibility setting.

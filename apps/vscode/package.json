@@ -2,7 +2,7 @@
   "name": "bend2-vscode",
   "displayName": "%extension.displayName%",
   "description": "%extension.description%",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "nuxyel",
   "license": "Apache-2.0",
   "repository": {
