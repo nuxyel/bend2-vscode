@@ -2,6 +2,8 @@
 
 The repository has automated coverage for the Proof Details HTML contract. A manual review is still required in a real VS Code desktop installation with a screen reader because the extension host and screen-reader bridge are not available in every CI environment.
 
+Status: I have not recorded this manual review for v1.0.0 or v1.0.1 yet; until a record is added below, only the automated contract has been checked.
+
 ## Automated contract
 
 Run:
