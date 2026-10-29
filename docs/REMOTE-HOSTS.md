@@ -1,5 +1,7 @@
 # Remote host configuration
 
+Status: I have not recorded a live check of these setups on WSL or a remote host yet; the configuration below follows VS Code's remote model.
+
 Bend 2 compiler processes run in the VS Code workspace host. Open the folder through WSL, Remote-SSH, a Dev Container or Codespaces so the compiler and the language server see the same files.
 
 The extension accepts a launcher in `bend2.executablePath` and arguments that must be placed before the Bend command in `bend2.executableArgs`:
