@@ -1,5 +1,10 @@
 # Change Log
 
+## Unreleased
+
+- The GPU backend is no longer reported as missing on Bend 2.0.35 and later: their `bend guide` says a machine without a GPU runs `!` on the CPU, which the capability check read as a compiler without GPU support, so the gpu profile was refused.
+- The dogfood matrix and CI pin Bend 2.0.40 as the latest tested release (2.0.32 before), with its checksum.
+
 ## 1.0.1 — 2026-09-27
 
 - Give the Marketplace listing a distinct display name after the initial name was rejected as already in use.
