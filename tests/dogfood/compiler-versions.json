@@ -4,7 +4,7 @@
     "linuxX64Sha256": "22bb6d5f6bce8ae2c5b340371fedddcbd90edc07a48b6e2b351a944c4558a3eb"
   },
   "latest": {
-    "version": "2.0.32",
-    "linuxX64Sha256": "5c365ddb12954d0933cef751802e0f7d9875f842edcb80f9661f89cd1a9ff7b6"
+    "version": "2.0.40",
+    "linuxX64Sha256": "c9ff8d67bd903fb6ad9a26b43d8a62c01021de82a44d55ce4a3dcd4732113d6b"
   }
 }
