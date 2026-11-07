@@ -269,6 +269,14 @@ test("does not mark explicitly unavailable capabilities as supported", () => {
   assert.equal(capabilities.threads, "unsupported");
 });
 
+test("does not read the guide's CPU fallback as a missing GPU backend", () => {
+  // Bend 2.0.35-2.0.40's guide: a description of where `!` runs, not a compiler without GPU support
+  const capabilities = parseCompilerCapabilities("Bangs run on the GPU with --gpu on. A machine without a GPU runs `!` on the CPU (still in parallel).", "guide");
+  assert.equal(capabilities.gpu, "supported");
+  assert.equal(parseCompilerCapabilities("No GPU backend in this build.", "guide").gpu, "unsupported");
+  assert.equal(parseCompilerCapabilities("GPU not supported.", "guide").gpu, "unsupported");
+});
+
 test("requires at least two backends for differential execution", async () => {
   const result = await new BendToolchain({ workspaceRoot: process.cwd() }).compareBackends("main.bend", ["native"]);
   assert.equal(result.comparable, false);
