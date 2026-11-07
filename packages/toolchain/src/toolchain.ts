@@ -209,7 +209,9 @@ export function parseCompilerCapabilities(output: string, source: "guide" | "hel
   return {
     javascript: has(/JavaScript target|JS backend|file\.js/i, /JavaScript[^\r\n.;]*(?:not|unavailable|unsupported|disabled)/i),
     native: has(/native (?:binary|executable)|compile(?:s|d)? .*C|clang/i, /native[^\r\n.;]*(?:not|unavailable|unsupported|disabled)/i),
-    gpu: has(/--gpu|GPU/i, /(?:no|without|missing|unavailable|unsupported|disabled)[^\r\n.;]*GPU|GPU[^\r\n.;]*(?:not|unavailable|unsupported|disabled)/i),
+    // A negative must be about the GPU backend itself: the guide since Bend 2.0.35 says "a machine without a GPU runs `!`
+    // on the CPU", which describes the fallback and must not read as a compiler without GPU support.
+    gpu: has(/--gpu|GPU/i, /\b(?:no|without|missing)\s+GPU\s+(?:backend|support|target)\b|\bGPU(?:\s+(?:backend|support|target))?\s+(?:is\s+)?(?:not\s+(?:available|supported)|unavailable|unsupported|disabled)\b/i),
     threads: has(/--threads|thread counts?|CPU threads?/i, /threads?[^\r\n.;]*(?:not|unavailable|unsupported|disabled)/i),
     source,
   };
