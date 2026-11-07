@@ -20,7 +20,7 @@ body:
     attributes:
       label: Bend version
       description: "Use Bend 2: Show Bend Version, or enter ‘not installed’."
-      placeholder: 2.0.32
+      placeholder: 2.0.40
     validations:
       required: true
   - type: dropdown
